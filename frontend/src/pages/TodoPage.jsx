@@ -18,17 +18,35 @@ function TodoPage() {
   }, [navigate]);
 
   const fetchTodos = async () => {
-    const data = await getTodos();
-    console.log("Fetched todos:", data); // Debug
-    setTodos(data.todos || []); // ✅ fix here
+    try {
+      const data = await getTodos();
+      console.log("Fetched todos:", data); // Debug
+      if (data.message) {
+        alert(data.message);
+        return;
+      }
+      setTodos(data.todos || []); // ✅ fix here
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+      alert("Failed to fetch todos. Please try again.");
+    }
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!text) return;
-    await addTodo(text);
-    setText("");
-    fetchTodos();
+    try {
+      const result = await addTodo(text);
+      if (result.message) {
+        alert(result.message);
+        return;
+      }
+      setText("");
+      fetchTodos();
+    } catch (error) {
+      console.error("Error adding todo:", error);
+      alert("Failed to add todo. Please try again.");
+    }
   };
 
   return (
