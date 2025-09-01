@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../api";
+import { login } from "../api";
 
-function RegisterPage() {
-  const [name, setName] = useState("");
+function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await registerUser(name, email, password);
+    const data = await login(email, password);
     if (data.token) {
-      navigate("/login");
+      localStorage.setItem("token", data.token);
+      navigate("/");
     } else {
-      alert(data.message || "Registration failed");
+      alert(data.message || "Login failed");
     }
   };
 
@@ -24,15 +24,7 @@ function RegisterPage() {
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-lg p-6 w-96"
       >
-        <h1 className="text-2xl font-bold mb-4">Register</h1>
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="w-full p-2 border rounded mb-3"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <h1 className="text-2xl font-bold mb-4">Login</h1>
         <input
           type="email"
           placeholder="Email"
@@ -49,13 +41,13 @@ function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
-          Register
+        <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+          Login
         </button>
         <p className="mt-2 text-sm">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-500">
-            Login
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-500">
+            Register
           </Link>
         </p>
       </form>
@@ -63,4 +55,4 @@ function RegisterPage() {
   );
 }
 
-export default RegisterPage;
+export default LoginPage;

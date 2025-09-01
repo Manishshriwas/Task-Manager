@@ -1,14 +1,21 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getTodos, addTodo, toggleTodo, deleteTodo } from "../api";
 import TodoItem from "../components/TodoItem";
 
 function TodoPage() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     fetchTodos();
-  }, []);
+  }, [navigate]);
 
   const fetchTodos = async () => {
     const data = await getTodos();
