@@ -22,14 +22,24 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Something went wrong!" });
 });
 
-// DB connect
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected successfully"))
-  .catch((err) => {
+// DB connect with better error handling
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB connected successfully");
+    console.log(`📊 Database: ${conn.connection.host}`);
+  } catch (err) {
     console.error("❌ MongoDB connection error:", err.message);
+    console.log("💡 Make sure MongoDB is running or update MONGO_URI in .env file");
+    console.log("🌐 For deployment, use MongoDB Atlas connection string");
     process.exit(1);
-  });
+  }
+};
+
+connectDB();
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

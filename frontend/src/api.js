@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:8000/api";
+// Local development URL (commented out)
+// const API_URL = "http://localhost:8000/api";
+
+// Production backend URL (Render deployment)
+const API_URL = "https://task-manager-backend1-s3o1.onrender.com/api";
 
 export const login = async (email, password) => {
   try {

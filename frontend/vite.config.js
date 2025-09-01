@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://task-manager-backend-vn0m.onrender.com",
+        target: "http://localhost:8000",
       },
     },
   },
