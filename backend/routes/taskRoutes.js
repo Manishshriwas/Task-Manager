@@ -1,58 +1,59 @@
-import express from 'express'
-import Task from '../models/task.js'
+// routes/todoRoutes.js
+import express from "express";
+import Todo from "../models/Todo.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
-const router=express.Router();
+const router = express.Router();
 
-//Get all todos
-router.get('/',async(req,res)=>{
-    try{
-      const tasks=await Task.find();
-      res.json(tasks);
-    }catch(error){
-        res.status(500).json({message:error.message})
-    }
-})
-
-// Add a new todo
-router.post("/", async (req, res) => {
-  const tasks = new Task({
-    text: req.body.text,
-  });
+// Create a todo
+router.post("/", authMiddleware, async (req, res) => {
   try {
-    const newTask = await tasks.save();
-    res.status(201).json(newTask);
+    const { text } = req.body;
+    const todo = await Todo.create({
+      text,
+      user: req.user.id, // linked to logged in user
+    });
+    res.json({ success: true, todo });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Update a todo (text and/or completed)
-router.patch("/:id", async (req, res) => {
+// Get todos of the logged-in user
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const tasks = await Task.findById(req.params.id);
-    if (!tasks) return res.status(404).json({ message: "Task not found" });
-
-    if (req.body.text !== undefined) {
-      tasks.text = req.body.text;
-    }
-    if (req.body.completed !== undefined) {
-      tasks.completed = req.body.completed;
-    }
-
-    const updatedTodo = await tasks.save();
-    res.json(updatedTodo);
+    const todos = await Todo.find({ user: req.user.id });
+    res.json({ success: true, todos });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// Delete a todo
-router.delete("/:id", async (req, res) => {
+// Toggle todo completion status
+router.patch("/:id/toggle", authMiddleware, async (req, res) => {
   try {
-    await Task.findByIdAndDelete(req.params.id);
-    res.json({ message: "Task deleted" });
+    const todo = await Todo.findOne({ _id: req.params.id, user: req.user.id });
+    if (!todo) {
+      return res.status(404).json({ success: false, message: "Todo not found" });
+    }
+    todo.completed = !todo.completed;
+    await todo.save();
+    res.json({ success: true, todo });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete todo
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    if (!todo) {
+      return res.status(404).json({ success: false, message: "Todo not found" });
+    }
+    res.json({ success: true, message: "Todo deleted" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
